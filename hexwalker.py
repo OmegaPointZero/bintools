@@ -92,7 +92,6 @@ class BinaryFileReader:
             "249": "9"
         }
 
-    # AM0B offset: c1d4f0c2(228)?
 
     def read_file(self):
         start_time = time.time()
@@ -112,7 +111,6 @@ class BinaryFileReader:
         if end_address > len(data):
             end_address = len(data)
         offset = start_address
-        print("Wait, wtf?")
         while offset < end_address:
             line = data[offset:offset+bytes_per_line]
             hex_offset = f"{offset:08x}"
@@ -124,17 +122,18 @@ class BinaryFileReader:
                 print(f"{hex_offset}  {hex_line}")
             offset += bytes_per_line
 
-    def print_hex_and_text(self, hex_offset, hex_line, encoding):
-            if encoding == 'ASCII':
-                ascii_line = "".join(chr(int(b,16)) if 32 <= int(b,16) <= 126 else '.' for b in hex_line.split())
-                print(f"[ 0x{hex_offset} ]: {hex_line}    |{ascii_line}|")
-            elif encoding == 'EBCDIC':
-                ebcdic_line = "".join(self.EBCDIC_Lookup(str(int(byte,16))) for byte in hex_line.split())
-                print(f"[ 0x{hex_offset} ]: {hex_line}    |{ebcdic_line}|")
-
-
-            else:
-                print(f"`[ 0x{hex_offset} ]: {hex_line}")
+    def render_text_output_line(self, hex_offset, hex_line, encoding):
+        if encoding == 'ASCII':
+            ascii_line = "".join(chr(int(b,16)) if 32 <= int(b,16) <= 126 else '.' for b in hex_line.split())
+            line = f"[ 0x{hex_offset} ]: {hex_line}    |{ascii_line}|"
+            return line
+        elif encoding == 'EBCDIC':
+            ebcdic_line = "".join(self.EBCDIC_Lookup(str(int(byte,16))) for byte in hex_line.split())
+            line = f"[ 0x{hex_offset} ]: {hex_line}    |{ebcdic_line}|"
+            return line
+        else:
+            line = f"`[ 0x{hex_offset} ]: {hex_line}"
+            return line
 
     def EBCDIC_Lookup(self, character):
         if character in self.EBCDIC_CHARS:
@@ -142,38 +141,50 @@ class BinaryFileReader:
         else:
             return "."
 
+    def render_hex_bytes_loop(self, data, start_address=0, end_address=None, bytes_per_line=16, encoding='ASCII'):
+        try:
+            while True:
+                if end_address is None:
+                    end_address = len(data)
+                offset = start_address
+                while offset < end_address:
+                    line = data[offset:offset+bytes_per_line]
+                    hex_offset = f"{offset:08x}"
+                    hex_line = " ".join(f"{b:02x}" for b in line)
+                    print(self.render_text_output_line(hex_offset, hex_line, encoding))
+                    offset += bytes_per_line
+                comma_separated_range = input("Input the hex strings for <start, end>:\n> ").replace(" ", "").split(",")
+                start_address = comma_separated_range[0]
+                end_address = comma_separated_range[1]
+                if start_address == "":
+                    start_address = 0
+                else:
+                    start_address = int(start_address, 16)
+                if end_address == "":
+                    end_address = None
+                else:
+                    end_address = int(end_address, 16)
+        except KeyboardInterrupt:
+            print("Exiting program")
 
     def render_hex_bytes(self, data, start_address=0, end_address=None, bytes_per_line=16, encoding='ASCII'):
-            try:
-                while True:
-                    if end_address is None:
-                        end_address = len(data)
-                    offset = start_address
-                    while offset < end_address:
-                        line = data[offset:offset+bytes_per_line]
-                        hex_offset = f"{offset:08x}"
-                        hex_line = " ".join(f"{b:02x}" for b in line)
-                        self.print_hex_and_text(hex_offset, hex_line, encoding)
-                        offset += bytes_per_line
-                    comma_separated_range = input("Input the hex strings for <start, end>:\n> ").replace(" ", "").split(",")
-                    start_address = comma_separated_range[0]
-                    end_address = comma_separated_range[1]
-                    if start_address == "":
-                        start_address = 0
-                    else:
-                        start_address = int(start_address, 16)
-                    if end_address == "":
-                        end_address = None
-                    else:
-                        end_address = int(end_address, 16)
-            except KeyboardInterrupt:
-                print("Exiting program")
+        if end_address is None:
+            end_address = len(data)
+        offset = start_address
+        hex_and_text = ""
+        while offset < end_address:
+            line = data[offset:offset + bytes_per_line]
+            hex_offset = f"{offset:08x}"
+            hex_line = " ".join(f"{b:02x}" for b in line)
+            hex_and_text += self.render_text_output_line(hex_offset, hex_line, encoding) + "\n"
+            offset += bytes_per_line
+        return hex_and_text
 
 
-
-filepath = input("Input filepath:\n> ")
-if filepath == "":
-    filepath = "/big/ML/original/B9727AM2.20230104.215121"
-reader = BinaryFileReader(filepath)
-reader.read_file()
-reader.render_hex_bytes(reader.data, end_address=0x100, bytes_per_line=32, encoding="EBCDIC")
+if __name__ == "__main__":
+    filepath = input("Input filepath:\n> ")
+    if filepath == "":
+        filepath = "/Users/joshuacampbell/Documents/missionLane/B9727AM9.20230108.205055"
+    reader = BinaryFileReader(filepath)
+    reader.read_file()
+    reader.render_hex_bytes_loop(reader.data, end_address=0x100, bytes_per_line=32, encoding="EBCDIC")

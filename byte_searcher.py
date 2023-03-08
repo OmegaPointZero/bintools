@@ -28,15 +28,14 @@ def print_offsets_hex(offsets):
 
 filepath = input("Input filepath:\n> ")
 if filepath == "":
-    filepath = "/home/joshcampbell/B9727AM2.20230104.215121"
+    filepath = "/Users/joshuacampbell/Documents/missionLane/B9727AM9.20230108.205055"
 bytes_to_seek = input("Input hex representation of bytes to look for:\n> ")
 if bytes_to_seek == "":
-    #bytes_to_seek = "C1D5F0C2"
-    bytes_to_seek = "C1D5F0"
+    bytes_to_seek = "C1D4F0C2"
 print("filepath: <%s>" % filepath)
 bytes_to_seek = hex_string_to_hex_data(bytes_to_seek) 
 print(bytes_to_seek)
 offsets = find_bytes(filepath, bytes_to_seek)
 print("Founds %s offsets" % len(offsets))
-print(offsets)
-print_offsets_hex(offsets)
+print(offsets[:20])
+print_offsets_hex(offsets[:20])
