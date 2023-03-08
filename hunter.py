@@ -1,3 +1,4 @@
+import paramiko
 import os
 import re
 from colors import colors
@@ -216,7 +217,7 @@ if __name__ == "__main__":
     # target = "./inputs/B9727AM2.20230227.211330"
     inputs_dir = "inputs/"
     target_files = open("target_output.txt", "r").read().split("\n")
-    read_files = 0
+    read_files = 3350
     os.makedirs("good", exist_ok=True)
     while True:
         input_files = os.listdir(inputs_dir)
@@ -258,10 +259,31 @@ if __name__ == "__main__":
                 if adt not in found_values:
                     found_values.append(adt)
             print(found_values)
-            os.remove(inputs_dir + target)
             gf = open("goodfiles.txt", "a")
             gf.write(target + "\n")
             gf.close
+            host = os.environ.get("SFTP_HOST")
+            port = int(os.environ.get("SFTP_PORT"))
+            username = os.environ.get("SFTP_USERNAME")
+            password = os.environ.get("SFTP_PASSWORD")
+
+            # Define local and remote file paths
+            local_path = "goodfiles.txt"
+            remote_path = "/data/mission_lane/goodfiles.txt"
+
+            # Create SFTP client
+            sftp = paramiko.SFTPClient()
+
+            # Connect to remote server
+            sftp.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            sftp.connect(host, port=port, username=username, password=password)
+
+            # Upload file
+            sftp.put(local_path, remote_path)
+
+            # Close SFTP connection
+            sftp.close()
+            #
             # break
         except Exception as e:
             print(e)
