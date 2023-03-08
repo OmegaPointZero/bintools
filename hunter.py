@@ -222,7 +222,7 @@ if __name__ == "__main__":
         input_files = os.listdir(inputs_dir)
         if len(input_files) == 0:
             print("Files processed so far: %s" % read_files)
-            if read_files < 1000:
+            if read_files < len(target_files):
                 next_file_number = read_files + 10 if len(target_files) <= read_files + 10 else len(target_files) - 1
                 files_to_get = target_files[read_files:read_files+10]
                 read_files += 10
