@@ -261,7 +261,7 @@ if __name__ == "__main__":
             gf = open("goodfiles.txt", "w")
             gf.write(target + "\n")
             gf.close
-            break
+            # break
         except Exception as e:
             print(e)
             bf = open("badfiles.txt", "w")
