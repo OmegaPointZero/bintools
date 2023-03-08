@@ -259,13 +259,13 @@ if __name__ == "__main__":
                     found_values.append(adt)
             print(found_values)
             os.remove(inputs_dir + target)
-            gf = open("goodfiles.txt", "w+")
+            gf = open("goodfiles.txt", "a")
             gf.write(target + "\n")
             gf.close
             # break
         except Exception as e:
             print(e)
-            bf = open("badfiles.txt", "w+")
+            bf = open("badfiles.txt", "a")
             bf.write(target+"\n")
             bf.close()
             os.remove(inputs_dir+target)
