@@ -211,8 +211,35 @@ class Hunter:
         return "\n".join(colored_lines)
 
 
+if __name__ == "__main__":
+    target = "../B9727AM2.20230203.212120"
+    print("Filename: %s" % target)
+    hunter = Hunter(file=target)
+    hunter.get_initial_offsets()
+    sample_offsets = hunter.offsets
+    found_values = []
+    count = 0
+    if len(sample_offsets) == 0:
+        raise Exception("AM0B record not found in this file.")
+    for offset in sample_offsets:
+        count += 1
+        if count % 10000 == 0:
+            print("Processed %i of %i records" % (count, len(sample_offsets)))
+        start = str(hex(offset))[2:]
+        end = str(hex(offset + 200))[2:]
+        parsed_offset_string = hunter.print_target_offsets(start, end, _print=False)
+        details = hunter.extract_record_details(parsed_offset_string)
+        colorized = hunter.colorize_target_offsets(parsed_offset_string)
+        if count in [1, 888, 77777]:
+            print("COUNT: %i" % count)
+            print(colorized)
+            hunter.print_record_details(parsed_offset_string)
+        adt = details['detail']['acct_misc_data_type']
+        if adt not in found_values:
+            found_values.append(adt)
 
-
+# this one programmatically calls from the AWS S3- re-written above to process individual files.
+"""
 if __name__ == "__main__":
     # target = "./inputs/B9727AM2.20230227.211330"
     inputs_dir = "inputs/"
@@ -291,3 +318,4 @@ if __name__ == "__main__":
             bf.write(target+"\n")
             bf.close()
             os.remove(inputs_dir+target)
+"""
