@@ -1,5 +1,8 @@
 __pycache__/
 .idea
 inputs/
-*.txt
+target_output.txt
+output.txt
+example.txt
+goodfiles.txt
 .env
